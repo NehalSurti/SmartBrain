@@ -21,6 +21,8 @@ export default function Navigation({ onRouteChange, isSignedIn }) {
 const NavBar = styled.nav`
   display: flex;
   justify-content: flex-end;
+  height: 100px;
+  align-items: center;
 `;
 
 const NavItem = styled.p`
