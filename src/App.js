@@ -120,12 +120,13 @@ function App() {
           left: 0,
         }}
       />
-      <Navigation
-        isSignedIn={isSignedIn}
-        onRouteChange={onRouteChange}
-      ></Navigation>
+
       {route === "home" ? (
         <div>
+          <Navigation
+            isSignedIn={isSignedIn}
+            onRouteChange={onRouteChange}
+          ></Navigation>
           <Logo></Logo>
           <Rank name={user.name} entries={user.entries}></Rank>
           <ImageLinkForm
