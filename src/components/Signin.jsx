@@ -1,79 +1,126 @@
 import React, { useState } from "react";
 import { signinRoute } from "../utils/APIRoutes";
 import styled from "styled-components";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { toastOptions } from "../utils/ToastOptions";
+import { loginUserSchema } from "../utils/Validation";
 
 export default function Signin({ onRouteChange, loadUser }) {
+  // State hooks for managing form data and loading state
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  // Event handler for email input field change
   const onEmailChange = (event) => {
     setSignInEmail(event.target.value);
   };
 
+  // Event handler for password input field change
   const onPasswordChange = (event) => {
     setSignInPassword(event.target.value);
   };
 
-  const onSubmitSignIn = () => {
-    fetch(signinRoute, {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: signInEmail,
-        password: signInPassword,
-      }),
-    })
-      .then((response) => response.json())
-      .then((user) => {
-        if (user.id) {
-          loadUser(user);
-          onRouteChange("home");
-        }
+  // Event handler for form submission
+  const onSubmitSignIn = async () => {
+    setLoading(true); // Set loading state to true
+
+    try {
+      // Validate user input using schema
+      await loginUserSchema.validate(
+        { email: signInEmail, password: signInPassword },
+        { abortEarly: false }
+      );
+    } catch (err) {
+      setLoading(false); // Reset loading state regardless of validation outcome
+
+      // If validation fails, show toast notifications for each error
+      if (err.name === "ValidationError") {
+        err.inner.forEach((error) => {
+          toast.error(error.message, toastOptions);
+        });
+      }
+      return; // Stop execution if validation fails
+    }
+
+    try {
+      // Make POST request to login the user
+      const response = await fetch(signinRoute, {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: signInEmail, password: signInPassword }),
       });
+
+      const user = await response.json();
+
+      // If login is successful, update user state and route
+      if (user.id) {
+        setSignInEmail("");
+        setSignInPassword("");
+        loadUser(user);
+        onRouteChange("home");
+      } else {
+        toast.error(user.message, toastOptions);
+      }
+    } catch (error) {
+      // Show error toast if login fails
+      toast.error("Login not successful", toastOptions);
+      console.error(
+        "There has been a problem with your fetch operation:",
+        error
+      );
+    } finally {
+      setLoading(false); // Reset loading state after the fetch operation
+    }
   };
 
   return (
-    <Wrapper>
-      <Article>
-        <Main>
-          <Measure>
-            <Fieldset id="sign_up">
-              <Legend>SIGN IN</Legend>
+    <>
+      <Wrapper>
+        <Article>
+          <Main>
+            <Measure>
+              <Fieldset id="sign_up">
+                <Legend>SIGN IN</Legend>
+                <div>
+                  <Label htmlFor="email-address">Email</Label>
+                  <Input
+                    type="email"
+                    name="email-address"
+                    id="email-address"
+                    onChange={onEmailChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    type="password"
+                    name="password"
+                    id="password"
+                    onChange={onPasswordChange}
+                  />
+                </div>
+              </Fieldset>
               <div>
-                <Label htmlFor="email-address">Email</Label>
-                <Input
-                  type="email"
-                  name="email-address"
-                  id="email-address"
-                  onChange={onEmailChange}
+                <SubmitInput
+                  onClick={onSubmitSignIn}
+                  type="submit"
+                  value="Sign in"
                 />
               </div>
               <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  type="password"
-                  name="password"
-                  id="password"
-                  onChange={onPasswordChange}
-                />
+                <Paragraph onClick={() => onRouteChange("register")}>
+                  DO NOT HAVE AN ACCOUNT?
+                </Paragraph>
               </div>
-            </Fieldset>
-            <div>
-              <SubmitInput
-                onClick={onSubmitSignIn}
-                type="submit"
-                value="Sign in"
-              />
-            </div>
-            <div>
-              <Paragraph onClick={() => onRouteChange("register")}>
-                DO NOT HAVE AN ACCOUNT?
-              </Paragraph>
-            </div>
-          </Measure>
-        </Main>
-      </Article>
-    </Wrapper>
+            </Measure>
+          </Main>
+        </Article>
+        {loading && <LoadingIndicator></LoadingIndicator>}
+      </Wrapper>
+      <ToastContainer />
+    </>
   );
 }
 
@@ -163,5 +210,28 @@ const Paragraph = styled.p`
 
   &:hover {
     text-decoration: underline;
+  }
+`;
+
+const LoadingIndicator = styled.div`
+  position: absolute;
+  /* top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); */
+  border: 10px solid #f3f3f3; 
+  border-top: 10px solid #bf34db; 
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+  z-index: 5;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 `;

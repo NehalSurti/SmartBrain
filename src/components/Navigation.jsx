@@ -8,13 +8,6 @@ export default function Navigation({ onRouteChange, isSignedIn }) {
         <NavItem onClick={() => onRouteChange("signout")}>Sign Out</NavItem>
       </NavBar>
     );
-  } else {
-    return (
-      <NavBar>
-        <NavItem onClick={() => onRouteChange("signin")}>Sign In</NavItem>
-        <NavItem onClick={() => onRouteChange("register")}>Register</NavItem>
-      </NavBar>
-    );
   }
 }
 
@@ -26,12 +19,14 @@ const NavBar = styled.nav`
 `;
 
 const NavItem = styled.p`
-  cursor: pointer;
   color: black;
-  text-decoration: underline;
   padding: 3px;
+  cursor: pointer;
+  margin-right: 20px;
+  z-index: 2;
 
   &:hover {
-    opacity: 50%;
+    opacity: 70%;
+    text-decoration: underline;
   }
 `;

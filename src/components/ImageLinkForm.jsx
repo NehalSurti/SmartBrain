@@ -10,12 +10,7 @@ export default function ImageLinkForm({ onInputChange, onButtonSubmit }) {
       <FormWrapper>
         <Form>
           <FormInput type="text" onChange={onInputChange} />
-          <FormButton
-            className="w-30 grow f4 link ph3 pv2 dib white bg-light-purple"
-            onClick={onButtonSubmit}
-          >
-            Detect
-          </FormButton>
+          <FormButton onClick={onButtonSubmit}>Detect</FormButton>
         </Form>
       </FormWrapper>
     </FormContainer>
@@ -27,7 +22,7 @@ const FormContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin: 20px;
+  width: 80%;
 `;
 
 const FormTitle = styled.p`
@@ -39,7 +34,7 @@ const FormWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 60%;
+  width: 80%;
   margin: 20px;
   z-index: 2;
 `;
