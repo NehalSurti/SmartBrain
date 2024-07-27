@@ -1,11 +1,20 @@
 import React from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 export default function Navigation({ onRouteChange, isSignedIn }) {
+  const navigate = useNavigate();
+
+  const signOut = () => {
+    localStorage.removeItem("user");
+    onRouteChange("signin");
+    navigate("/signin");
+  };
+
   if (isSignedIn) {
     return (
       <NavBar>
-        <NavItem onClick={() => onRouteChange("signout")}>Sign Out</NavItem>
+        <NavItem onClick={signOut}>Sign Out</NavItem>
       </NavBar>
     );
   }

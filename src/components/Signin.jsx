@@ -1,16 +1,20 @@
 import React, { useState } from "react";
 import { signinRoute } from "../utils/APIRoutes";
-import styled from "styled-components";
+import { loginUserSchema } from "../utils/Validation";
+import { useAppContext } from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
+import { toastOptions } from "../utils/ToastOptions";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { toastOptions } from "../utils/ToastOptions";
-import { loginUserSchema } from "../utils/Validation";
+import styled from "styled-components";
 
-export default function Signin({ onRouteChange, loadUser }) {
+export default function Signin() {
   // State hooks for managing form data and loading state
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { onRouteChange, loadUser } = useAppContext();
+  const navigate = useNavigate();
 
   // Event handler for email input field change
   const onEmailChange = (event) => {
@@ -56,10 +60,12 @@ export default function Signin({ onRouteChange, loadUser }) {
 
       // If login is successful, update user state and route
       if (user.id) {
+        localStorage.setItem("user", JSON.stringify(user));
         setSignInEmail("");
         setSignInPassword("");
         loadUser(user);
         onRouteChange("home");
+        navigate("/");
       } else {
         toast.error(user.message, toastOptions);
       }
@@ -73,6 +79,11 @@ export default function Signin({ onRouteChange, loadUser }) {
     } finally {
       setLoading(false); // Reset loading state after the fetch operation
     }
+  };
+
+  const handleClick = () => {
+    onRouteChange("register");
+    navigate("/register");
   };
 
   return (
@@ -110,7 +121,7 @@ export default function Signin({ onRouteChange, loadUser }) {
                 />
               </div>
               <div>
-                <Paragraph onClick={() => onRouteChange("register")}>
+                <Paragraph onClick={handleClick}>
                   DO NOT HAVE AN ACCOUNT?
                 </Paragraph>
               </div>
@@ -218,8 +229,8 @@ const LoadingIndicator = styled.div`
   /* top: 50%;
   left: 50%;
   transform: translate(-50%, -50%); */
-  border: 10px solid #f3f3f3; 
-  border-top: 10px solid #bf34db; 
+  border: 10px solid #f3f3f3;
+  border-top: 10px solid #bf34db;
   border-radius: 50%;
   width: 50px;
   height: 50px;

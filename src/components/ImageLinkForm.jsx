@@ -5,7 +5,7 @@ export default function ImageLinkForm({ onInputChange, onButtonSubmit }) {
   return (
     <FormContainer>
       <FormTitle>
-        {"This Magic Brain will detect faces in your pictures. Git it a try."}
+        {"This Magic Brain will detect face in your picture. Git it a try."}
       </FormTitle>
       <FormWrapper>
         <Form>

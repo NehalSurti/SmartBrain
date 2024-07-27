@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 export default function FaceRecognition({ imageUrl, box }) {
   return (
-    <FaceRecognitionContainer>
+    <FaceRecognitionContainer display={imageUrl ? true : false}>
       <ImageWrapper>
         <Image id="inputimage" alt="" src={imageUrl} />
         <BoundingBox
@@ -21,17 +21,20 @@ const FaceRecognitionContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  display: ${(props) => props.display === false && "none"};
 `;
 
 const ImageWrapper = styled.div`
-  /* position: absolute;
-  margin-top: 1rem; */
   position: relative;
+  width: 350px;
+  height: 350px;
+  overflow: hidden;
 `;
 
 const Image = styled.img`
-  width: 500px;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   position: relative;
   z-index: 2;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);

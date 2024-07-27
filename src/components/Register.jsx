@@ -5,13 +5,17 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { toastOptions } from "../utils/ToastOptions";
 import { registerUserSchema } from "../utils/Validation";
+import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../context/AppContext";
 
-export default function Register({ loadUser, onRouteChange }) {
+export default function Register() {
   // State hooks for managing form data and loading state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const { onRouteChange, loadUser } = useAppContext();
+  const navigate = useNavigate();
 
   // Event handler for name input field change
   const onNameChange = (event) => {
@@ -61,11 +65,13 @@ export default function Register({ loadUser, onRouteChange }) {
 
       // If registration is successful, update user state and route
       if (user.id) {
+        localStorage.setItem("user", JSON.stringify(user));
         setEmail("");
         setPassword("");
         setName("");
         loadUser(user);
         onRouteChange("home");
+        navigate("/");
       } else {
         toast.error(user.message, toastOptions);
       }
@@ -79,6 +85,11 @@ export default function Register({ loadUser, onRouteChange }) {
     } finally {
       setLoading(false); // Reset loading state after the fetch operation
     }
+  };
+
+  const handleClick = () => {
+    onRouteChange("signin");
+    navigate("/signin");
   };
 
   return (
@@ -128,7 +139,7 @@ export default function Register({ loadUser, onRouteChange }) {
                 />
               </div>
               <div>
-                <Paragraph onClick={() => onRouteChange("signin")}>
+                <Paragraph onClick={handleClick}>
                   ALREADY HAVE AN ACCOUNT?
                 </Paragraph>
               </div>
