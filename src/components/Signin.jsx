@@ -94,7 +94,7 @@ export default function Signin() {
             <Measure>
               <Fieldset id="sign_up">
                 <Legend>SIGN IN</Legend>
-                <div>
+                <EmailDiv>
                   <Label htmlFor="email-address">Email</Label>
                   <Input
                     type="email"
@@ -102,8 +102,8 @@ export default function Signin() {
                     id="email-address"
                     onChange={onEmailChange}
                   />
-                </div>
-                <div>
+                </EmailDiv>
+                <PasswordDiv>
                   <Label htmlFor="password">Password</Label>
                   <Input
                     type="password"
@@ -111,20 +111,20 @@ export default function Signin() {
                     id="password"
                     onChange={onPasswordChange}
                   />
-                </div>
+                </PasswordDiv>
               </Fieldset>
-              <div>
+              <SubmitDiv>
                 <SubmitInput
                   onClick={onSubmitSignIn}
                   type="submit"
                   value="Sign in"
                 />
-              </div>
-              <div>
+              </SubmitDiv>
+              <CreateAccountDiv>
                 <Paragraph onClick={handleClick}>
                   DO NOT HAVE AN ACCOUNT?
                 </Paragraph>
-              </div>
+              </CreateAccountDiv>
             </Measure>
           </Main>
         </Article>
@@ -179,6 +179,14 @@ const Legend = styled.legend`
   margin-bottom: 1rem;
   font-size: 2rem;
 `;
+
+const EmailDiv = styled.div``;
+
+const PasswordDiv = styled.div``;
+
+const SubmitDiv = styled.div``;
+
+const CreateAccountDiv = styled.div``;
 
 const Label = styled.label`
   display: block;

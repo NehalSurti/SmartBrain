@@ -19,6 +19,7 @@ export const AppProvider = ({ children }) => {
       email: "",
       entries: 0,
       joined: "",
+      token: "",
     },
   };
 
@@ -35,6 +36,7 @@ export const AppProvider = ({ children }) => {
         email: data.email,
         entries: data.entries,
         joined: data.createdAt,
+        token: data.token,
       },
     }));
   };
@@ -151,6 +153,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
+      
       loadUser(user);
       onRouteChange("home");
     }
