@@ -1,16 +1,18 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
+import Signin from "./Signin";
+import { toastOptions } from "../utils/ToastOptions";
+import { loginUserSchema } from "../utils/Validation";
 import { useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
-import { loginUserSchema } from "../utils/Validation";
-import Signin from "./Signin";
 
 // Mock the necessary modules
-jest.mock("../context/AppContext");
-jest.mock("react-router-dom", () => ({
-  useNavigate: jest.fn(),
+jest.mock("react-toastify", () => ({
+  toast: {
+    error: jest.fn(),
+  },
+  ToastContainer: () => <div />,
 }));
 jest.mock("../utils/APIRoutes", () => ({
   signinRoute: "/signin",
@@ -20,30 +22,31 @@ jest.mock("../utils/Validation", () => ({
     validate: jest.fn(),
   },
 }));
-jest.mock("../utils/ToastOptions", () => ({
-  toastOptions: {},
+jest.mock("react-router-dom", () => ({
+  useNavigate: jest.fn(),
+}));
+jest.mock("../context/AppContext", () => ({
+  useAppContext: jest.fn(),
 }));
 
 describe("Signin component", () => {
-  const setSignInEmail = jest.fn();
-  const setSignInPassword = jest.fn();
-  const setLoading = jest.fn();
-  const onRouteChange = jest.fn();
-  const loadUser = jest.fn();
-  const navigate = jest.fn();
+  let mockOnRouteChange;
+  let mockLoadUser;
+  let navigate;
 
   beforeEach(() => {
-    // Reset mocks before each test
-    jest.clearAllMocks();
-
-    // Mock useAppContext hook
+    mockOnRouteChange = jest.fn();
+    mockLoadUser = jest.fn();
+    navigate = jest.fn();
     useAppContext.mockReturnValue({
-      onRouteChange,
-      loadUser,
+      onRouteChange: mockOnRouteChange,
+      loadUser: mockLoadUser,
     });
-
-    // Mock useNavigate hook
     useNavigate.mockReturnValue(navigate);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   test("renders sign in form", () => {
@@ -55,11 +58,25 @@ describe("Signin component", () => {
       );
     });
 
+    const emailInput = screen.getByText((content, element) => {
+      return element.type === "email" && element.name === "email-address";
+    });
+
+    const passwordInput = screen.getByText((content, element) => {
+      return element.type === "password" && element.name === "password";
+    });
+
+    const signinButton = screen.getByText((content, element) => {
+      return element.type === "submit" && element.value === "Sign in";
+    });
+
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
-    // expect(screen.getByText(/Sign in/i)).toBeInTheDocument();
     expect(screen.getByText(/DO NOT HAVE AN ACCOUNT/i)).toBeInTheDocument();
     expect(legendElement).toBeInTheDocument();
+    expect(emailInput).toBeInTheDocument();
+    expect(passwordInput).toBeInTheDocument();
+    expect(signinButton).toBeInTheDocument();
   });
 
   test("updates state on input change", () => {
@@ -74,60 +91,83 @@ describe("Signin component", () => {
     expect(passwordInput.value).toBe("password");
   });
 
+  test("validates input and shows error messages", async () => {
+    loginUserSchema.validate.mockRejectedValue({
+      name: "ValidationError",
+      inner: [
+        { message: "Email is invalid" },
+        { message: "Password is too short" },
+      ],
+    });
+
+    render(<Signin />);
+
+    const signinButton = screen.getByText((content, element) => {
+      return element.type === "submit" && element.value === "Sign in";
+    });
+
+    fireEvent.click(signinButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        "Email is invalid",
+        toastOptions
+      );
+      expect(toast.error).toHaveBeenCalledWith(
+        "Password is too short",
+        toastOptions
+      );
+    });
+  });
+
   test("handles form submission successfully", async () => {
-    const mockUser = { id: "1" };
+    loginUserSchema.validate.mockResolvedValue(true);
+    const mockUser = { id: 1, email: "test@example.com", name: "Test User" };
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve(mockUser),
       })
     );
-    loginUserSchema.validate.mockResolvedValue(true);
 
-    render(
-      <>
-        <Signin />
-        <ToastContainer />
-      </>
-    );
+    render(<Signin />);
 
-    const signInButton = screen.getByText((content, element) => {
+    const signinButton = screen.getByText((content, element) => {
       return element.type === "submit" && element.value === "Sign in";
     });
-    fireEvent.click(signInButton);
+
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "test@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: "password123" },
+    });
+    fireEvent.click(signinButton);
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith("/signin", expect.any(Object));
-      expect(loadUser).toHaveBeenCalledWith(mockUser);
-      expect(onRouteChange).toHaveBeenCalledWith("home");
+      expect(mockLoadUser).toHaveBeenCalledWith(mockUser);
+      expect(mockOnRouteChange).toHaveBeenCalledWith("home");
       expect(navigate).toHaveBeenCalledWith("/");
     });
   });
 
   test("handles form submission failure", async () => {
+    loginUserSchema.validate.mockResolvedValue(true);
     global.fetch = jest.fn(() =>
       Promise.resolve({
-        ok: false, // Simulate a failed response
-        status: 400,
         json: () => Promise.resolve({ message: "Login failed" }),
       })
     );
-    loginUserSchema.validate.mockResolvedValue(true);
 
-    render(
-      <>
-        <Signin />
-        {/* <ToastContainer /> */}
-      </>
-    );
+    render(<Signin />);
 
-    const signInButton = screen.getByText((content, element) => {
+    const signinButton = screen.getByText((content, element) => {
       return element.type === "submit" && element.value === "Sign in";
     });
-    fireEvent.click(signInButton);
+    fireEvent.click(signinButton);
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith("/signin", expect.any(Object));
-      expect(screen.getByText("Login failed")).toBeInTheDocument();
+      expect(toast.error).toHaveBeenCalledWith("Login failed", toastOptions);
     });
   });
 
@@ -136,25 +176,51 @@ describe("Signin component", () => {
     const registerLink = screen.getByText(/DO NOT HAVE AN ACCOUNT/i);
     fireEvent.click(registerLink);
 
-    expect(onRouteChange).toHaveBeenCalledWith("register");
+    expect(mockOnRouteChange).toHaveBeenCalledWith("register");
     expect(navigate).toHaveBeenCalledWith("/register");
   });
 
-  //   test('shows loading indicator during form submission', async () => {
-  //     global.fetch = jest.fn(() => new Promise((resolve) => setTimeout(() => resolve({
-  //       json: () => Promise.resolve({ id: '1' }),
-  //     }), 1000)));
-  //     loginUserSchema.validate.mockResolvedValue(true);
+  test("shows loading indicator during form submission", async () => {
+    loginUserSchema.validate.mockResolvedValue(true);
+    // global.fetch = jest.fn(
+    //   () =>
+    //     new Promise((resolve) =>
+    //       setTimeout(
+    //         () =>
+    //           resolve({
+    //             ok: true,
+    //             json: () => Promise.resolve({ id: "1" }),
+    //           }),
+    //         1000
+    //       )
+    //     )
+    // );
 
-  //     render(<Signin />);
+    const mockUser = { id: 1, email: "test@example.com", name: "Test User" };
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockUser),
+      })
+    );
 
-  //     const signInButton = screen.getByText(/Sign in/i);
-  //     fireEvent.click(signInButton);
+    render(<Signin />);
 
-  //     expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
+    const signinButton = screen.getByText((content, element) => {
+      return element.type === "submit" && element.value === "Sign in";
+    });
 
-  //     await waitFor(() => {
-  //       expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument();
-  //     });
-  //   });
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "test@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: "password123" },
+    });
+    fireEvent.click(signinButton);
+
+    expect(screen.getByTestId("loading-indicator")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("loading-indicator")).not.toBeInTheDocument();
+    });
+  });
 });

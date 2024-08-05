@@ -128,7 +128,9 @@ export default function Signin() {
             </Measure>
           </Main>
         </Article>
-        {loading && <LoadingIndicator></LoadingIndicator>}
+        {loading && (
+          <LoadingIndicator data-testid="loading-indicator"></LoadingIndicator>
+        )}
       </Wrapper>
       <ToastContainer />
     </>
