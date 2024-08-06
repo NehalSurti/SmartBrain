@@ -19,6 +19,18 @@ describe("Navigation Component", () => {
     jest.clearAllMocks();
   });
 
+  beforeAll(() => {
+    const localStorageMock = {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    };
+    Object.defineProperty(window, "localStorage", {
+      value: localStorageMock,
+    });
+  });
+
   test("renders sign out button when signed in", () => {
     render(<Navigation onRouteChange={mockOnRouteChange} isSignedIn={true} />);
 
@@ -42,27 +54,5 @@ describe("Navigation Component", () => {
 
     const signOutButton = screen.queryByText("Sign Out");
     expect(signOutButton).not.toBeInTheDocument();
-  });
-});
-
-beforeAll(() => {
-  const localStorageMock = (() => {
-    let store = {};
-    return {
-      getItem: (key) => store[key] || null,
-      setItem: (key, value) => {
-        store[key] = value.toString();
-      },
-      removeItem: (key) => {
-        delete store[key];
-      },
-      clear: () => {
-        store = {};
-      },
-    };
-  })();
-
-  Object.defineProperty(window, "localStorage", {
-    value: localStorageMock,
   });
 });

@@ -2,15 +2,25 @@ import React from "react";
 import styled from "styled-components";
 
 export default function FaceRecognition({ imageUrl, box }) {
+  if (!imageUrl) {
+    return null;
+  }
+
   return (
-    <FaceRecognitionContainer display={imageUrl ? true : false}>
+    <FaceRecognitionContainer>
       <ImageWrapper>
-        <Image id="inputimage" alt="" src={imageUrl} />
+        <Image
+          id="inputimage"
+          data-testid="input-image"
+          alt=""
+          src={imageUrl}
+        />
         <BoundingBox
-          topRow={box.topRow}
-          rightCol={box.rightCol}
-          bottomRow={box.bottomRow}
-          leftCol={box.leftCol}
+          data-testid="Bounding-Box"
+          top={box.topRow}
+          right={box.rightCol}
+          bottom={box.bottomRow}
+          left={box.leftCol}
         ></BoundingBox>
       </ImageWrapper>
     </FaceRecognitionContainer>
@@ -21,7 +31,6 @@ const FaceRecognitionContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  display: ${(props) => props.display === false && "none"};
 `;
 
 const ImageWrapper = styled.div`
@@ -48,8 +57,8 @@ const BoundingBox = styled.div`
   justify-content: center;
   cursor: pointer;
   z-index: 5;
-  top: ${(props) => props.topRow}px;
-  right: ${(props) => props.rightCol}px;
-  bottom: ${(props) => props.bottomRow}px;
-  left: ${(props) => props.leftCol}px;
+  top: ${(props) => props.top}px;
+  right: ${(props) => props.right}px;
+  bottom: ${(props) => props.bottom}px;
+  left: ${(props) => props.left}px;
 `;

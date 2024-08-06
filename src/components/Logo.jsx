@@ -6,7 +6,7 @@ import styled from "styled-components";
 export default function Logo() {
   return (
     <LogoContainer>
-      <TiltWrapper options={{ max: 55 }}>
+      <TiltWrapper className="tiltWrapper" options={{ max: 55 }}>
         <LogoWrapper>
           <LogoImg alt="logo" src={brain} />
         </LogoWrapper>

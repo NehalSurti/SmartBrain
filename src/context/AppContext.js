@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import { toast } from "react-toastify";
 import { imageRoute, imageurlRoute } from "../utils/APIRoutes";
 import { toastOptions } from "../utils/ToastOptions";
+import { InputUrlSchema } from "../utils/Validation";
 
 const AppContext = createContext();
 
@@ -86,13 +87,24 @@ export const AppProvider = ({ children }) => {
   const onButtonSubmit = async () => {
     setLoading(true); // Set loading state to true
 
-    if (state.input.length === 0) {
-      toast.error("Input the link to the picture", toastOptions);
+    try {
+      await InputUrlSchema.validate(
+        { imageUrl: state.input },
+        { abortEarly: false }
+      );
+    } catch (err) {
       setLoading(false);
+
+      if (err.name === "ValidationError") {
+        err.inner.forEach((error) => {
+          toast.error(error.message, toastOptions);
+        });
+      }
+      setState((prevState) => ({ ...prevState, imageUrl: "", box: {} }));
       return;
     }
 
-    setState((prevState) => ({ ...prevState, imageUrl: state.input }));
+    setState((prevState) => ({ ...prevState, imageUrl: state.input, box: {} }));
 
     try {
       const response = await fetch(imageurlRoute, {
@@ -130,7 +142,11 @@ export const AppProvider = ({ children }) => {
           console.error("Error during PUT request:", putError);
         }
 
-        displayFaceBox(calculateFaceLocation(data.response));
+        if (data.response.outputs[0].data.regions.length === 0) {
+          toast.error("Image does not have a face in it", toastOptions);
+        } else {
+          displayFaceBox(calculateFaceLocation(data.response));
+        }
       } else {
         toast.error("Error fetching data", toastOptions);
       }
@@ -153,7 +169,6 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
-      
       loadUser(user);
       onRouteChange("home");
     }
