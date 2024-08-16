@@ -4,7 +4,7 @@ import { loginUserSchema } from "../utils/Validation";
 import { useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import { toastOptions } from "../utils/ToastOptions";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import styled from "styled-components";
 
@@ -132,7 +132,6 @@ export default function Signin() {
           <LoadingIndicator data-testid="loading-indicator"></LoadingIndicator>
         )}
       </Wrapper>
-      <ToastContainer />
     </>
   );
 }

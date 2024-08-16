@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { registerRoute } from "../utils/APIRoutes";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { toastOptions } from "../utils/ToastOptions";
 import { registerUserSchema } from "../utils/Validation";
@@ -148,7 +148,6 @@ export default function Register() {
         </Article>
         {loading && <LoadingIndicator></LoadingIndicator>}
       </Wrapper>
-      <ToastContainer />
     </>
   );
 }

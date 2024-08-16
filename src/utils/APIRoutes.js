@@ -1,6 +1,4 @@
-const host = "http://localhost:5000";
-
-export const imageRoute = `${host}/image/entriesCount`;
-export const imageurlRoute = `${host}/image/imageurl`;
-export const signinRoute = `${host}/signin`;
-export const registerRoute = `${host}/register`;
+export const imageRoute = `/api/image/entriesCount`;
+export const imageurlRoute = `/api/image/imageurl`;
+export const signinRoute = `/api/signin`;
+export const registerRoute = `/api/register`;
